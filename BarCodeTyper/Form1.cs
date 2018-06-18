@@ -19,14 +19,14 @@ namespace BarCodeTyper
 {
     public partial class Form1 : Form
     {
-
+        //icons by https://www.flaticon.com/packs/essential-collection/2
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int HT_CAPTION = 0x2;
         [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
         public static extern bool ReleaseCapture();
-
+        bool isSettingMenuVisible = true;
 
         private FilterInfoCollection videoDevices;
         private VideoCaptureDevice videoSource;
@@ -50,6 +50,8 @@ namespace BarCodeTyper
 
             Oklabel.Visible = false;
 
+            cameraconfigbtn.Parent = this.ParentForm;
+            OpenSettingsMenu();
         }
 
         private void BuscaCamerasInstaladas()
@@ -63,7 +65,7 @@ namespace BarCodeTyper
             if (comboBoxCameraSource.Items.Count < 1)
             {
                 //Nenhuma camera conectada
-                Start.Enabled = false;
+               // Start.Enabled = false;
 
             }
             else
@@ -128,14 +130,35 @@ namespace BarCodeTyper
 
             CloseSettingsMenu();
         }
-
+        
         private void CloseSettingsMenu()
         {
-            EscolhaCameraPanel.Visible = false;
-            EscolhaCameraPanel.Update();
+            cameraconfigbtn.Parent = pictureBoxSource;
+            //EscolhaCameraPanel.Visible = false;
+            //EscolhaCameraPanel.Update();
             panelMenuCamera.Visible = false;
             pnlSettings.Visible = false;
             panelMenuCamera.Update();
+            isSettingMenuVisible = false;
+
+            
+        }
+
+        private void OpenSettingsMenu()
+        {
+            cameraconfigbtn.Parent = panelMenuCamera;
+            // EscolhaCameraPanel.Visible = true;
+            //EscolhaCameraPanel.Update();
+            panelMenuCamera.Visible = true;
+            pnlSettings.Visible = true;
+            panelMenuCamera.Update();
+            isSettingMenuVisible = true;
+
+            Settings settings = new Settings();
+            settings.Load();
+            tbAfterTextSend.Text = settings.AfterReadCommand;
+            tbAfterString.Text = settings.StartSearchString;
+            tbBeforeString.Text = settings.EndSearchString;
         }
 
         private void ChangeStatusNoMessage()
@@ -366,6 +389,11 @@ namespace BarCodeTyper
         private void Start_Click(object sender, EventArgs e)
         {
             StartCamera();
+            Settings settings = new Settings();
+            settings.AfterReadCommand = tbAfterTextSend.Text;
+            settings.StartSearchString = tbAfterString.Text;
+            settings.EndSearchString = tbBeforeString.Text;
+            settings.Save();
         }
 
         private void comboBoxCameraSource_SelectedIndexChanged(object sender, EventArgs e)
@@ -474,7 +502,20 @@ namespace BarCodeTyper
 
         private void cameraconfigbtn_Click(object sender, EventArgs e)
         {
-            CloseSettingsMenu();
+            if (isSettingMenuVisible)
+                CloseSettingsMenu();
+            else
+                OpenSettingsMenu();
+        }
+
+        private void btnInvertY_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnRefreshCamera_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
